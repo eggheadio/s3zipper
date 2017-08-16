@@ -51,12 +51,12 @@ func main() {
 		return
 	}
 
-	configFile, _ := os.Open("conf.json")
-	decoder := json.NewDecoder(configFile)
-	err := decoder.Decode(&config)
-	if err != nil {
-		panic("Error reading conf")
-	}
+	config.AccessKey = os.Getenv("AWS_ACCESS_KEY_ID")
+	config.SecretKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
+	config.Bucket = os.Getenv("AWS_BUCKET")
+	config.Region = os.Getenv("AWS_REGION")
+	config.RedisServerAndPort = os.Getenv("REDIS_SERVER_AND_PORT")
+	config.Port = os.Getenv("PORT")
 
 	initAwsBucket()
 	InitRedis()
