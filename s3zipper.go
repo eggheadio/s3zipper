@@ -3,6 +3,7 @@ package main
 import (
 	"archive/zip"
 	"encoding/json"
+	"net/url"
 	"errors"
 	"fmt"
 	"io"
@@ -25,7 +26,7 @@ type Configuration struct {
 	SecretKey          string
 	Bucket             string
 	Region             string
-	RedisServerAndPort string
+	RedisUrl           string
 	Port               int
 }
 
@@ -57,7 +58,7 @@ func main() {
 	config.SecretKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
 	config.Bucket = os.Getenv("AWS_BUCKET")
 	config.Region = os.Getenv("AWS_REGION")
-	config.RedisServerAndPort = os.Getenv("REDIS_SERVER_AND_PORT")
+	config.RedisUrl = os.Getenv("REDIS_URL")
 	config.Port = port
 
 	initAwsBucket()
@@ -110,7 +111,18 @@ func InitRedis() {
 		MaxIdle:     10,
 		IdleTimeout: 1 * time.Second,
 		Dial: func() (redigo.Conn, error) {
-			return redigo.Dial("tcp", config.RedisServerAndPort)
+			url, _ := url.Parse(config.RedisUrl)
+			c, err := redigo.Dial("tcp", url.Host)
+			if err != nil {
+				return nil, err
+			}
+			p, _ := url.User.Password()
+
+			if _, err := c.Do("AUTH", p); err != nil {
+				c.Close()
+				return nil, err
+			}			
+			return c, nil
 		},
 		TestOnBorrow: func(c redigo.Conn, t time.Time) (err error) {
 			_, err = c.Do("PING")
