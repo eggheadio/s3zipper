@@ -1,1 +1,1 @@
-web: go run s3zipper.go
+web: s3zipper
