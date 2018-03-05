@@ -58,7 +58,7 @@ func main() {
 	config.SecretKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
 	config.Bucket = os.Getenv("AWS_BUCKET")
 	config.Region = os.Getenv("AWS_REGION")
-	config.RedisUrl = os.Getenv("REDIS_URL")
+	config.RedisUrl = os.Getenv(os.Getenv("REDIS_PROVIDER"))
 	config.Port = port
 
 	initAwsBucket()
